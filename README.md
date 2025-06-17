@@ -90,6 +90,23 @@ npm run type-check      # Verifica tipos TypeScript
 
 Ver [DEPLOYMENT.md](./DEPLOYMENT.md) para instrucciones detalladas de despliegue.
 
+### Despliegue Rápido en EasyPanel
+
+1. **Crear nueva aplicación** en EasyPanel
+2. **Configurar fuente**: Conectar tu repositorio Git
+3. **Configurar build**:
+   - Dockerfile Path: `Dockerfile`
+   - Port: `80`
+4. **Variables de entorno**:
+   ```env
+   NODE_ENV=production
+   PORT=80
+   HOST=0.0.0.0
+   ```
+5. **Deploy** - La aplicación detectará automáticamente su URL
+
+Ver [EASYPANEL-CONFIG.md](./EASYPANEL-CONFIG.md) para configuración detallada.
+
 ### Verificación Pre-despliegue
 
 ```bash

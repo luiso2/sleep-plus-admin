@@ -2,18 +2,23 @@
 // Configuración del servidor para diferentes entornos
 
 const config = {
-  // Puerto del servidor - EasyPanel usa puerto 80
-  port: process.env.PORT || 80,
+  // Puerto del servidor - EasyPanel usa puerto 80, desarrollo usa 3001
+  port: process.env.PORT || (process.env.NODE_ENV === 'production' ? 80 : 3001),
   
   // Host del servidor
   host: process.env.HOST || '0.0.0.0',
   
   // Configuración de CORS
   cors: {
-    origin: process.env.CORS_ORIGIN || '*',
+    // En producción con EasyPanel, aceptar cualquier origen
+    // ya que el frontend y backend están en el mismo dominio
+    origin: process.env.NODE_ENV === 'production' 
+      ? true  // Aceptar cualquier origen en producción
+      : (process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:3001', 'http://127.0.0.1:5173', 'http://127.0.0.1:3001']),
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Shopify-Access-Token']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Shopify-Access-Token'],
+    exposedHeaders: ['Content-Length', 'X-Request-Id']
   },
   
   // Configuración de la base de datos
@@ -37,7 +42,7 @@ const config = {
   // URLs base para diferentes servicios
   urls: {
     frontend: process.env.FRONTEND_URL || 'http://localhost:5173',
-    api: process.env.API_URL || `http://127.0.0.1:${process.env.PORT || 8080}`
+    api: process.env.API_URL || `http://127.0.0.1:${process.env.PORT || (process.env.NODE_ENV === 'production' ? 80 : 3001)}`
   }
 };
 

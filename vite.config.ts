@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   
   // URL del API - usa variable de entorno o fallback a localhost
-  const apiUrl = env.VITE_API_URL || 'http://127.0.0.1:8080';
+  const apiUrl = env.VITE_API_URL || 'http://127.0.0.1:3001';
   
   // Lista de rutas que necesitan proxy
   const proxyRoutes = [

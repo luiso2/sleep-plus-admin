@@ -16,6 +16,7 @@
     "start:prod": "NODE_ENV=production node server/server.js",
     "refine": "refine",
     "check:urls": "node scripts/check-hardcoded-urls.js",
+    "check:ports": "node scripts/check-port-config.js",
     "lint": "eslint src --ext .ts,.tsx",
     "type-check": "tsc --noEmit"
   },

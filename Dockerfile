@@ -20,8 +20,9 @@ RUN if [ -f package-lock.json ]; then \
 # Copiar código fuente
 COPY . .
 
-# Configurar variables de entorno de build con valores por defecto para EasyPanel
-ARG VITE_API_URL=https://telegram-crm-millonario-sleep-admin.dqyvuv.easypanel.host
+# Configurar variables de entorno de build
+# IMPORTANTE: Usar placeholder que será reemplazado en runtime
+ARG VITE_API_URL="DYNAMIC_API_URL"
 ARG VITE_APP_NAME="Sleep+ Admin"
 ARG VITE_APP_VERSION="1.0.0"
 ARG VITE_ENABLE_DEVTOOLS="false"
@@ -33,6 +34,13 @@ ENV VITE_ENABLE_DEVTOOLS=${VITE_ENABLE_DEVTOOLS}
 
 # Build del frontend para producción
 RUN npm run build
+
+# Crear script para reemplazar URLs en runtime
+RUN echo '#!/bin/sh\n\
+API_URL="${API_URL:-http://localhost}"\n\
+find /app/dist -type f -name "*.js" -o -name "*.html" | while read file; do\n\
+  sed -i "s|DYNAMIC_API_URL|$API_URL|g" "$file"\n\
+done' > /app/replace-api-url.sh && chmod +x /app/replace-api-url.sh
 
 # Verificar que el build se completó correctamente
 RUN echo "Verificando build del frontend..." && \
@@ -71,6 +79,7 @@ COPY .env.* ./
 
 # Copiar build del frontend desde la etapa anterior
 COPY --from=frontend-builder /app/dist ./dist
+COPY --from=frontend-builder /app/replace-api-url.sh ./
 
 # Crear directorio para archivos estáticos
 RUN mkdir -p ./public && chown -R sleep-admin:nodejs /app
@@ -85,9 +94,19 @@ EXPOSE 80
 ENV NODE_ENV=production
 ENV PORT=80
 ENV HOST=0.0.0.0
-ENV API_URL=${API_URL:-https://telegram-crm-millonario-sleep-plus-admin.dqyvuv.easypanel.host}
-ENV FRONTEND_URL=${FRONTEND_URL:-https://telegram-crm-millonario-sleep-plus-admin.dqyvuv.easypanel.host}
-ENV CORS_ORIGIN=${CORS_ORIGIN:-https://telegram-crm-millonario-sleep-plus-admin.dqyvuv.easypanel.host}
+
+# Script de inicio
+RUN echo '#!/bin/sh\n\
+# Detectar URL automáticamente si no está configurada\n\
+if [ -z "$API_URL" ]; then\n\
+  export API_URL=""\n\
+fi\n\
+\n\
+# Reemplazar URLs dinámicamente\n\
+/app/replace-api-url.sh\n\
+\n\
+# Iniciar servidor\n\
+exec node server/server.js' > /app/start.sh && chmod +x /app/start.sh
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
@@ -95,4 +114,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Comando de inicio con dumb-init
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "server/server.js"]
+CMD ["/app/start.sh"]

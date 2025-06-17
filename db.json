@@ -14499,6 +14499,161 @@
       "metadata": {},
       "timestamp": "2025-06-17T15:55:37.957Z",
       "id": "log-1750175737957-p2k48e4hk"
+    },
+    {
+      "userId": "emp-002",
+      "userEmail": "john.smith@lamattressstore.com",
+      "userName": "John Smith",
+      "action": "view",
+      "resource": "employees",
+      "resourceId": "list",
+      "details": {
+        "count": 6,
+        "filters": [
+          {
+            "field": "storeId",
+            "operator": "eq",
+            "value": "store-001"
+          },
+          {
+            "field": "role",
+            "operator": "eq",
+            "value": "agent"
+          }
+        ]
+      },
+      "metadata": {},
+      "timestamp": "2025-06-17T21:56:43.045Z",
+      "id": "log-1750197403045-t91xacczs"
+    },
+    {
+      "userId": "emp-002",
+      "userEmail": "john.smith@lamattressstore.com",
+      "userName": "John Smith",
+      "action": "view",
+      "resource": "sales",
+      "resourceId": "list",
+      "details": {
+        "count": 3,
+        "filters": [
+          {
+            "field": "storeId",
+            "operator": "eq",
+            "value": "store-001"
+          }
+        ]
+      },
+      "metadata": {},
+      "timestamp": "2025-06-17T21:56:43.055Z",
+      "id": "log-1750197403055-msidtzu1t"
+    },
+    {
+      "userId": "emp-002",
+      "userEmail": "john.smith@lamattressstore.com",
+      "userName": "John Smith",
+      "action": "view",
+      "resource": "employees",
+      "resourceId": "list",
+      "details": {
+        "count": 6,
+        "filters": [
+          {
+            "field": "storeId",
+            "operator": "eq",
+            "value": "store-001"
+          },
+          {
+            "field": "role",
+            "operator": "eq",
+            "value": "agent"
+          }
+        ]
+      },
+      "metadata": {},
+      "timestamp": "2025-06-17T22:24:57.951Z",
+      "id": "log-1750199097951-j2o23kvb8"
+    },
+    {
+      "userId": "emp-002",
+      "userEmail": "john.smith@lamattressstore.com",
+      "userName": "John Smith",
+      "action": "view",
+      "resource": "sales",
+      "resourceId": "list",
+      "details": {
+        "count": 3,
+        "filters": [
+          {
+            "field": "storeId",
+            "operator": "eq",
+            "value": "store-001"
+          }
+        ]
+      },
+      "metadata": {},
+      "timestamp": "2025-06-17T22:24:57.960Z",
+      "id": "log-1750199097960-vuudarpxd"
+    },
+    {
+      "userId": "emp-002",
+      "userEmail": "john.smith@lamattressstore.com",
+      "userName": "John Smith",
+      "action": "view",
+      "resource": "employees",
+      "resourceId": "list",
+      "details": {
+        "count": 6,
+        "filters": [
+          {
+            "field": "storeId",
+            "operator": "eq",
+            "value": "store-001"
+          },
+          {
+            "field": "role",
+            "operator": "eq",
+            "value": "agent"
+          }
+        ]
+      },
+      "metadata": {},
+      "timestamp": "2025-06-17T22:42:24.979Z",
+      "id": "log-1750200144979-gtwqev7xh"
+    },
+    {
+      "userId": "emp-002",
+      "userEmail": "john.smith@lamattressstore.com",
+      "userName": "John Smith",
+      "action": "view",
+      "resource": "sales",
+      "resourceId": "list",
+      "details": {
+        "count": 3,
+        "filters": [
+          {
+            "field": "storeId",
+            "operator": "eq",
+            "value": "store-001"
+          }
+        ]
+      },
+      "metadata": {},
+      "timestamp": "2025-06-17T22:42:25.111Z",
+      "id": "log-1750200145111-g1pu79cng"
+    },
+    {
+      "userId": "emp-002",
+      "userEmail": "john.smith@lamattressstore.com",
+      "userName": "John Smith",
+      "action": "view",
+      "resource": "campaigns",
+      "resourceId": "camp-003",
+      "details": {
+        "timestamp": "2025-06-17T22:45:17.599Z"
+      },
+      "metadata": {},
+      "timestamp": "2025-06-17T22:45:17.599Z",
+      "id": "log-1750200317599-jo1rfrwok"
     }
   ],
   "webhooks": [

@@ -1,8 +1,19 @@
 import { AuthProvider } from "@refinedev/core";
 import { activityLogService } from "../services/activityLogService";
 
+// Función para obtener la URL base de la API
+const getApiUrl = () => {
+  // Si estamos en producción, usar URLs relativas
+  if (import.meta.env.PROD) {
+    return "";
+  }
+  
+  // En desarrollo, usar la variable de entorno o fallback
+  return import.meta.env.VITE_API_URL || "http://127.0.0.1:3001";
+};
+
 // Use environment variable or fallback to localhost
-const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8080";
+const API_URL = getApiUrl();
 
 export const authProvider: AuthProvider = {
   login: async ({ email, password }) => {

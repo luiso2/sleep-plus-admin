@@ -3,8 +3,22 @@ import axios from "axios";
 import { activityLogService } from "../services/activityLogService";
 import { ACTIVITY_RESOURCES } from "../interfaces/activityLog";
 
-// Use environment variable or fallback to localhost
-const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8080";
+// Función para obtener la URL base de la API
+const getApiUrl = () => {
+  // Si estamos en producción, usar URLs relativas
+  if (import.meta.env.PROD) {
+    // En producción, las APIs están en el mismo dominio
+    return "";
+  }
+  
+  // En desarrollo, usar la variable de entorno o fallback
+  return import.meta.env.VITE_API_URL || "http://127.0.0.1:3001";
+};
+
+// Use environment variable or fallback
+const API_URL = getApiUrl();
+
+console.log('🔧 API URL configured as:', API_URL || 'Relative URLs (same origin)');
 
 // Create axios instance
 const axiosInstance = axios.create({
@@ -239,5 +253,5 @@ export const customDataProvider: DataProvider = {
     };
   },
 
-  getApiUrl: () => API_URL,
+  getApiUrl: () => API_URL || window.location.origin,
 };
