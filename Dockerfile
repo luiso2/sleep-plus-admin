@@ -85,9 +85,9 @@ EXPOSE 80
 ENV NODE_ENV=production
 ENV PORT=80
 ENV HOST=0.0.0.0
-ENV API_URL=${VITE_API_URL}
-ENV FRONTEND_URL=${VITE_API_URL}
-ENV CORS_ORIGIN=${VITE_API_URL}
+ENV API_URL=${API_URL:-https://telegram-crm-millonario-sleep-plus-admin.dqyvuv.easypanel.host}
+ENV FRONTEND_URL=${FRONTEND_URL:-https://telegram-crm-millonario-sleep-plus-admin.dqyvuv.easypanel.host}
+ENV CORS_ORIGIN=${CORS_ORIGIN:-https://telegram-crm-millonario-sleep-plus-admin.dqyvuv.easypanel.host}
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Frontend - Sleep Plus Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .status { 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+        }
+        .success { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb;
+        }
+        .error { 
+            background: #f8d7da; 
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test de Frontend - Sleep Plus Admin</h1>
+    
+    <div id="results"></div>
+    
+    <h2>Pruebas Disponibles:</h2>
+    <button onclick="testHealth()">1. Test Health Check</button>
+    <button onclick="testDebugFiles()">2. Test Debug Files</button>
+    <button onclick="testFrontend()">3. Test Frontend React</button>
+    <button onclick="testAPI()">4. Test API Endpoints</button>
+    <button onclick="testAll()">5. Ejecutar Todas las Pruebas</button>
+    
+    <div id="output"></div>
+
+    <script>
+        const baseURL = window.location.origin;
+        const output = document.getElementById('output');
+        
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            output.appendChild(div);
+        }
+        
+        async function testHealth() {
+            output.innerHTML = '<h3>Test: Health Check</h3>';
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                
+                if (data.status === 'ok' && data.frontend === true) {
+                    addResult('✅ Health Check OK - Frontend detectado', 'success');
+                    addResult(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+                } else {
+                    addResult('⚠️ Health Check OK pero frontend no detectado', 'error');
+                    addResult(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+                }
+            } catch (error) {
+                addResult(`❌ Error en Health Check: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testDebugFiles() {
+            output.innerHTML = '<h3>Test: Debug Files</h3>';
+            try {
+                const response = await fetch('/api/debug/files');
+                const data = await response.json();
+                
+                addResult('📁 Estructura de archivos:', 'info');
+                addResult(`<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+                
+                // Verificar dist
+                const distCheck = data.checks.find(c => c.label === 'Dist dir');
+                if (distCheck && distCheck.exists) {
+                    addResult('✅ Directorio dist encontrado', 'success');
+                    if (distCheck.files && distCheck.files.includes('index.html')) {
+                        addResult('✅ index.html encontrado en dist', 'success');
+                    } else {
+                        addResult('❌ index.html NO encontrado en dist', 'error');
+                    }
+                } else {
+                    addResult('❌ Directorio dist NO encontrado', 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Error en Debug Files: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testFrontend() {
+            output.innerHTML = '<h3>Test: Frontend React</h3>';
+            try {
+                const response = await fetch('/');
+                const html = await response.text();
+                
+                if (html.includes('<!DOCTYPE html>') || html.includes('<!doctype html>')) {
+                    addResult('✅ Respuesta HTML recibida', 'success');
+                    
+                    if (html.includes('id="root"') || html.includes('id=root')) {
+                        addResult('✅ Elemento root de React encontrado', 'success');
+                    } else {
+                        addResult('⚠️ Elemento root de React NO encontrado', 'error');
+                    }
+                    
+                    if (html.includes('assets/') || html.includes('/assets/')) {
+                        addResult('✅ Referencias a assets encontradas', 'success');
+                    } else {
+                        addResult('⚠️ No se encontraron referencias a assets', 'error');
+                    }
+                    
+                    // Mostrar primeras líneas del HTML
+                    const preview = html.substring(0, 500) + '...';
+                    addResult(`<pre>${preview}</pre>`, 'info');
+                } else {
+                    addResult('❌ No se recibió HTML válido', 'error');
+                    addResult(`<pre>${html.substring(0, 500)}</pre>`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Error al cargar frontend: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testAPI() {
+            output.innerHTML = '<h3>Test: API Endpoints</h3>';
+            
+            // Test algunos endpoints básicos
+            const endpoints = [
+                '/employees',
+                '/stores',
+                '/api/shopify/test-connection'
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(endpoint);
+                    if (response.ok || response.status === 400) {
+                        addResult(`✅ ${endpoint} - Status: ${response.status}`, 'success');
+                    } else {
+                        addResult(`⚠️ ${endpoint} - Status: ${response.status}`, 'error');
+                    }
+                } catch (error) {
+                    addResult(`❌ ${endpoint} - Error: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        async function testAll() {
+            output.innerHTML = '<h2>Ejecutando todas las pruebas...</h2>';
+            await testHealth();
+            output.innerHTML += '<hr>';
+            await testDebugFiles();
+            output.innerHTML += '<hr>';
+            await testFrontend();
+            output.innerHTML += '<hr>';
+            await testAPI();
+            addResult('<h3>✅ Todas las pruebas completadas</h3>', 'success');
+        }
+        
+        // Información inicial
+        window.onload = () => {
+            const results = document.getElementById('results');
+            results.innerHTML = `
+                <div class="status info">
+                    <strong>URL Base:</strong> ${baseURL}<br>
+                    <strong>Fecha:</strong> ${new Date().toLocaleString()}<br>
+                    <strong>User Agent:</strong> ${navigator.userAgent}
+                </div>
+            `;
+        };
+    </script>
+</body>
+</html>
