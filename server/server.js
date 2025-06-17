@@ -46,6 +46,12 @@ if (fs.existsSync(distPath)) {
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] ${req.method} ${req.path}`);
+  
+  // Log detallado para debugging de rutas estáticas
+  if (!req.path.startsWith('/api') && req.method === 'GET') {
+    console.log(`📁 Static request: ${req.path}`);
+  }
+  
   if (req.method === 'POST' && req.path.startsWith('/api/shopify')) {
     console.log('Headers:', JSON.stringify(req.headers, null, 2));
     console.log('Body:', JSON.stringify(req.body, null, 2));
@@ -63,6 +69,69 @@ app.get('/health', (req, res) => {
     port: PORT,
     timestamp: new Date().toISOString()
   });
+});
+
+// Test page para verificar frontend
+app.get('/test-frontend', (req, res) => {
+  const testHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Frontend - Sleep Plus Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test de Frontend - Sleep Plus Admin</h1>
+    
+    <div class="status info">
+        <strong>Servidor:</strong> ✅ Funcionando<br>
+        <strong>Frontend detectado:</strong> ${fs.existsSync(indexPath) ? '✅ Sí' : '❌ No'}<br>
+        <strong>Archivos en dist:</strong> ${fs.existsSync(distPath) ? fs.readdirSync(distPath).join(', ') : 'No encontrado'}
+    </div>
+    
+    <h2>Enlaces de prueba:</h2>
+    <ul>
+        <li><a href="/">Frontend principal</a></li>
+        <li><a href="/health">Health Check</a></li>
+        <li><a href="/api/debug/files">Debug Files</a></li>
+        <li><a href="/employees">API: Employees</a></li>
+    </ul>
+    
+    <h2>Verificación de archivos estáticos:</h2>
+    <div id="static-test">
+        <p>Intentando cargar el index.html...</p>
+    </div>
+    
+    <script>
+        fetch('/')
+          .then(r => r.text())
+          .then(html => {
+            const div = document.getElementById('static-test');
+            if (html.includes('id="root"') || html.includes('id=root')) {
+              div.innerHTML = '<div class="status success">✅ React app detectada correctamente</div>';
+            } else if (html.includes('<!DOCTYPE html>')) {
+              div.innerHTML = '<div class="status error">⚠️ HTML recibido pero no parece ser la app React</div>';
+            } else {
+              div.innerHTML = '<div class="status error">❌ No se recibió HTML válido</div>';
+            }
+            div.innerHTML += '<pre>' + html.substring(0, 500) + '...</pre>';
+          })
+          .catch(err => {
+            document.getElementById('static-test').innerHTML = 
+              '<div class="status error">❌ Error: ' + err.message + '</div>';
+          });
+    </script>
+</body>
+</html>
+  `;
+  res.send(testHtml);
 });
 
 // Debug endpoint para verificar archivos
