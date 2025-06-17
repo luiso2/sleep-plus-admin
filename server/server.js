@@ -1283,36 +1283,39 @@ app.use((err, req, res, next) => {
 const HOST = config.host;
 
 app.listen(PORT, HOST, () => {
+  // Usar la URL pública si está disponible, sino usar host:port local
+  const PUBLIC_URL = process.env.API_URL || process.env.VITE_API_URL || `http://${HOST}:${PORT}`;
+  
   console.log('');
   console.log('🚀 Server is running!');
   console.log('====================');
   console.log(`📡 Host: ${HOST}`);
   console.log(`📡 Port: ${PORT}`);
-  console.log(`🌐 URL: http://${HOST}:${PORT}`);
+  console.log(`🌐 URL: ${PUBLIC_URL}`);
   console.log('');
   console.log('📋 Available endpoints:');
   console.log('  Health Check:');
-  console.log(`    GET  http://${HOST}:${PORT}/health`);
+  console.log(`    GET  ${PUBLIC_URL}/health`);
   console.log('');
   console.log('  Shopify Proxy:');
-  console.log(`    POST http://${HOST}:${PORT}/api/shopify/test-connection`);
-  console.log(`    POST http://${HOST}:${PORT}/api/shopify/products`);
-  console.log(`    POST http://${HOST}:${PORT}/api/shopify/customers`);
-  console.log(`    POST http://${HOST}:${PORT}/api/shopify/price-rules`);
-  console.log(`    POST http://${HOST}:${PORT}/api/shopify/price-rules/create`);
-  console.log(`    POST http://${HOST}:${PORT}/api/shopify/discount-codes/:id`);
-  console.log(`    POST http://${HOST}:${PORT}/api/shopify/price-rules/:id/discount-codes`);
+  console.log(`    POST ${PUBLIC_URL}/api/shopify/test-connection`);
+  console.log(`    POST ${PUBLIC_URL}/api/shopify/products`);
+  console.log(`    POST ${PUBLIC_URL}/api/shopify/customers`);
+  console.log(`    POST ${PUBLIC_URL}/api/shopify/price-rules`);
+  console.log(`    POST ${PUBLIC_URL}/api/shopify/price-rules/create`);
+  console.log(`    POST ${PUBLIC_URL}/api/shopify/discount-codes/:id`);
+  console.log(`    POST ${PUBLIC_URL}/api/shopify/price-rules/:id/discount-codes`);
   console.log('');
   console.log('  Webhooks:');
-  console.log(`    POST http://${HOST}:${PORT}/api/webhooks/trade-evaluation`);
-  console.log(`    POST http://${HOST}:${PORT}/api/webhooks/shopify/:event`);
-  console.log(`    GET  http://${HOST}:${PORT}/api/webhook-events`);
+  console.log(`    POST ${PUBLIC_URL}/api/webhooks/trade-evaluation`);
+  console.log(`    POST ${PUBLIC_URL}/api/webhooks/shopify/:event`);
+  console.log(`    GET  ${PUBLIC_URL}/api/webhook-events`);
   console.log('');
   console.log('  JSON Server:');
-  console.log(`    GET  http://${HOST}:${PORT}/[resource]`);
-  console.log(`    POST http://${HOST}:${PORT}/[resource]`);
-  console.log(`    PUT  http://${HOST}:${PORT}/[resource]/:id`);
-  console.log(`    DELETE http://${HOST}:${PORT}/[resource]/:id`);
+  console.log(`    GET  ${PUBLIC_URL}/[resource]`);
+  console.log(`    POST ${PUBLIC_URL}/[resource]`);
+  console.log(`    PUT  ${PUBLIC_URL}/[resource]/:id`);
+  console.log(`    DELETE ${PUBLIC_URL}/[resource]/:id`);
   console.log('');
   console.log('Press Ctrl+C to stop the server');
   console.log('====================');
