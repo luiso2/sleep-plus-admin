@@ -46,4 +46,4 @@ Thumbs.db
 # Package manager
 pnpm-lock.yaml
 yarn.lock
-package-lock.json
+# package-lock.json  # Needed for Docker builds
