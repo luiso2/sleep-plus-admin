@@ -24,11 +24,16 @@ export const SystemSettingsPage: React.FC = () => {
     if (settings) {
       form.setFieldsValue({
         ...settings,
-        workingHours: {
+        workingHours: settings.workingHours ? {
           start: dayjs(settings.workingHours.start, 'HH:mm'),
           end: dayjs(settings.workingHours.end, 'HH:mm'),
+        } : {
+          start: dayjs('09:00', 'HH:mm'),
+          end: dayjs('18:00', 'HH:mm'),
         },
-        overdueNotificationTime: dayjs(settings.overdueNotificationTime, 'HH:mm'),
+        overdueNotificationTime: settings.overdueNotificationTime 
+          ? dayjs(settings.overdueNotificationTime, 'HH:mm')
+          : dayjs('14:00', 'HH:mm'),
       });
     }
   }, [settings, form]);
@@ -36,11 +41,14 @@ export const SystemSettingsPage: React.FC = () => {
   const handleSubmit = (values: any) => {
     const updatedSettings = {
       ...values,
-      workingHours: {
-        start: values.workingHours.start.format('HH:mm'),
-        end: values.workingHours.end.format('HH:mm'),
+      workingHours: values.workingHours ? {
+        start: values.workingHours.start?.format('HH:mm') || '09:00',
+        end: values.workingHours.end?.format('HH:mm') || '18:00',
+      } : {
+        start: '09:00',
+        end: '18:00',
       },
-      overdueNotificationTime: values.overdueNotificationTime.format('HH:mm'),
+      overdueNotificationTime: values.overdueNotificationTime?.format('HH:mm') || '14:00',
       updatedAt: new Date().toISOString(),
       updatedBy: user?.id,
     };
