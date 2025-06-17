@@ -204,7 +204,7 @@ export const ScriptShow: React.FC = () => {
           {/* Segmentos del script */}
           <Card title="Contenido del Script" style={{ marginTop: 16 }}>
             <Collapse defaultActiveKey={["0"]}>
-              {script.segments.map((segment, index) => {
+              {(script.segments || []).map((segment, index) => {
                 const segmentInfo = getSegmentTypeInfo(segment.type);
                 return (
                   <Panel
@@ -234,10 +234,10 @@ export const ScriptShow: React.FC = () => {
                           message="Condiciones de activación"
                           description={
                             <Space direction="vertical">
-                              {segment.conditions.customerTier && (
+                              {segment.conditions?.customerTier && (
                                 <div>
                                   <Text strong>Niveles de cliente: </Text>
-                                  {segment.conditions.customerTier.map((tier) => (
+                                  {(segment.conditions.customerTier || []).map((tier) => (
                                     <Tag key={tier} color={tier === "gold" ? "gold" : tier === "silver" ? "silver" : "bronze"}>
                                       {tier === "gold" ? "Oro" : tier === "silver" ? "Plata" : "Bronce"}
                                     </Tag>
@@ -300,9 +300,9 @@ export const ScriptShow: React.FC = () => {
         <Col xs={24} lg={8}>
           {/* Variables */}
           <Card title="Variables Dinámicas">
-            {script.variables.length > 0 ? (
+            {(script.variables || []).length > 0 ? (
               <Space wrap>
-                {script.variables.map((variable) => (
+                {(script.variables || []).map((variable) => (
                   <Tag key={variable} icon={<TagOutlined />} color="blue">
                     {variable}
                   </Tag>
