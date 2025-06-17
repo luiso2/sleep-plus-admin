@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Upload de Fotos - Trade-In</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #1B9CD8;
+        }
+        .photo-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .photo-preview img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        button {
+            background: #1B9CD8;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background: #1476A8;
+        }
+        button:disabled {
+            background: #ccc;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .stats {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test de Upload de Fotos Grande</h1>
+        
+        <div class="info">
+            <strong>ℹ️ Información:</strong> Este test verifica que el formulario puede manejar fotos grandes sin errores. Las fotos se muestran pero no se envían al servidor.
+        </div>
+        
+        <div class="upload-area" id="uploadArea">
+            <p>📸 Arrastra fotos aquí o haz click para seleccionar</p>
+            <p><small>Puedes subir fotos de cualquier tamaño</small></p>
+            <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+        </div>
+        
+        <div class="photo-preview" id="photoPreview"></div>
+        
+        <div class="stats" id="stats" style="display: none;">
+            <h3>📊 Estadísticas de las fotos:</h3>
+            <div id="statsContent"></div>
+        </div>
+        
+        <button id="testBtn" disabled>Probar Envío al Servidor</button>
+        
+        <div class="result" id="result"></div>
+    </div>
+    
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const photoPreview = document.getElementById('photoPreview');
+        const statsDiv = document.getElementById('stats');
+        const statsContent = document.getElementById('statsContent');
+        const testBtn = document.getElementById('testBtn');
+        const result = document.getElementById('result');
+        
+        let uploadedFiles = [];
+        
+        // Click en área de upload
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#1B9CD8';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#ccc';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ccc';
+            handleFiles(e.dataTransfer.files);
+        });
+        
+        // Selección de archivos
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+        
+        function handleFiles(files) {
+            uploadedFiles = Array.from(files);
+            photoPreview.innerHTML = '';
+            
+            let totalSize = 0;
+            const stats = [];
+            
+            uploadedFiles.forEach((file, index) => {
+                // Preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    photoPreview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+                
+                // Stats
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                totalSize += file.size;
+                stats.push({
+                    name: file.name,
+                    size: sizeMB + ' MB',
+                    type: file.type
+                });
+            });
+            
+            // Mostrar estadísticas
+            if (uploadedFiles.length > 0) {
+                statsDiv.style.display = 'block';
+                statsContent.innerHTML = `
+                    <div class="stat-item">
+                        <span>Total de fotos:</span>
+                        <strong>${uploadedFiles.length}</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Tamaño total:</span>
+                        <strong>${(totalSize / (1024 * 1024)).toFixed(2)} MB</strong>
+                    </div>
+                    ${stats.map((stat, i) => `
+                        <div class="stat-item">
+                            <span>Foto ${i + 1}:</span>
+                            <strong>${stat.size}</strong>
+                        </div>
+                    `).join('')}
+                `;
+                
+                testBtn.disabled = uploadedFiles.length < 3;
+                testBtn.textContent = uploadedFiles.length >= 3 
+                    ? 'Probar Envío al Servidor' 
+                    : `Agrega ${3 - uploadedFiles.length} fotos más`;
+            }
+        }
+        
+        // Test de envío
+        testBtn.addEventListener('click', async () => {
+            result.style.display = 'none';
+            testBtn.disabled = true;
+            testBtn.textContent = 'Procesando...';
+            
+            // Datos de prueba
+            const testData = {
+                customer: {
+                    firstName: 'Test',
+                    lastName: 'User',
+                    email: 'test@example.com',
+                    phone: '(310) 555-1234',
+                    zipCode: '90210'
+                },
+                mattress: {
+                    brand: 'tempur-pedic',
+                    size: 'queen',
+                    age: 2,
+                    condition: 'good'
+                },
+                credit: 250,
+                // IMPORTANTE: Enviamos fotos simuladas, NO las reales
+                photos: [
+                    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+                    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+                    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
+                ]
+            };
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/webhooks/trade-evaluation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <h3>✅ ¡Éxito!</h3>
+                        <p>El servidor procesó la solicitud correctamente.</p>
+                        <p><strong>Importante:</strong> Las fotos grandes se mostraron pero NO se enviaron al servidor.</p>
+                        <p>Código generado: <strong>${data.data.couponCode}</strong></p>
+                    `;
+                } else {
+                    throw new Error(data.error || 'Error al procesar');
+                }
+                
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `
+                    <h3>❌ Error</h3>
+                    <p>${error.message}</p>
+                    <p>Asegúrate de que el servidor esté corriendo: <code>npm run dev</code></p>
+                `;
+            } finally {
+                result.style.display = 'block';
+                testBtn.disabled = false;
+                testBtn.textContent = 'Probar Envío al Servidor';
+            }
+        });
+    </script>
+</body>
+</html>
