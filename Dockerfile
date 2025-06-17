@@ -9,8 +9,13 @@ WORKDIR /app
 # Copiar archivos de dependencias
 COPY package*.json ./
 
-# Instalar TODAS las dependencias (incluyendo dev para el build)
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+# IMPORTANTE: Instalar TODAS las dependencias (incluyendo devDependencies)
+# Esto es necesario para que Vite y otras herramientas de build estén disponibles
+RUN if [ -f package-lock.json ]; then \
+    npm ci; \
+    else \
+    npm install; \
+    fi
 
 # Copiar código fuente
 COPY . .
@@ -44,14 +49,19 @@ RUN apk add --no-cache \
 COPY package*.json ./
 
 # Instalar solo dependencias de producción
-RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi && npm cache clean --force
+RUN if [ -f package-lock.json ]; then \
+    npm ci --omit=dev; \
+    else \
+    npm install --omit=dev; \
+    fi \
+    && npm cache clean --force
 
 # Copiar código del servidor
 COPY server/ ./server/
 COPY db.json ./
 COPY routes.json ./
 
-# Copiar archivos de configuración
+# Copiar archivos de configuración si existen
 COPY .env.* ./
 
 # Copiar build del frontend desde la etapa anterior
@@ -68,8 +78,11 @@ EXPOSE 8080
 
 # Variables de entorno por defecto
 ENV NODE_ENV=production
-ENV PORT=8080
+ENV PORT=${PORT:-8080}
 ENV HOST=0.0.0.0
+ENV API_URL=${VITE_API_URL}
+ENV FRONTEND_URL=${VITE_API_URL}
+ENV CORS_ORIGIN=${VITE_API_URL}
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
@@ -77,4 +90,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Comando de inicio con dumb-init
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "server/server.js"] 
+CMD ["node", "server/server.js"]
