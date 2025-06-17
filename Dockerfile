@@ -9,11 +9,22 @@ WORKDIR /app
 # Copiar archivos de dependencias
 COPY package*.json ./
 
-# Instalar dependencias (usar npm install si no existe package-lock.json)
-RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi
+# Instalar TODAS las dependencias (incluyendo dev para el build)
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # Copiar código fuente
 COPY . .
+
+# Configurar variables de entorno de build
+ARG VITE_API_URL
+ARG VITE_APP_NAME
+ARG VITE_APP_VERSION
+ARG VITE_ENABLE_DEVTOOLS
+
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_APP_NAME=${VITE_APP_NAME}
+ENV VITE_APP_VERSION=${VITE_APP_VERSION}
+ENV VITE_ENABLE_DEVTOOLS=${VITE_ENABLE_DEVTOOLS}
 
 # Build del frontend para producción
 RUN npm run build
