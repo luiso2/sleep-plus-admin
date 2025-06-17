@@ -193,3 +193,6 @@ npm install
 ## 📄 Licencia
 
 Privado - Todos los derechos reservados
+
+---
+**Última actualización**: 17 de junio de 2025 - Sistema optimizado para Easypanel con configuraciones mejoradas y resolución de problemas de routing.
