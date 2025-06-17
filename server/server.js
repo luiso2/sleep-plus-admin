@@ -1280,7 +1280,7 @@ app.get('/api/subscriptions/stats', async (req, res) => {
 
 console.log('📂 Setting up JSON Server...');
 
-// JSON Server - debe ir AL FINAL
+// JSON Server - configurar rutas específicas
 const dbPath = path.join(__dirname, '..', 'db.json');
 console.log('📄 Database path:', dbPath);
 
@@ -1294,14 +1294,22 @@ const middlewares = jsonServer.defaults({
 // Aplicar middlewares de json-server
 app.use(middlewares);
 
-// Usar el router de json-server para todas las demás rutas
-app.use(router);
+// Usar el router de json-server solo para rutas que no sean del frontend
+app.use((req, res, next) => {
+  // Solo aplicar JSON Server a rutas que parezcan de API/datos
+  if (req.path.match(/^\/[a-zA-Z0-9_-]+(\?.*)?$/) && !req.path.startsWith('/api/')) {
+    console.log(`🗃️ JSON Server route: ${req.path}`);
+    router(req, res, next);
+  } else {
+    next();
+  }
+});
 
 // SPA fallback - IMPORTANTE: Debe ir después de todas las rutas API
 // Cualquier ruta no manejada devuelve el index.html
 app.get('*', (req, res) => {
   // No aplicar a rutas API
-  if (req.path.startsWith('/api/') || req.path.startsWith('/api')) {
+  if (req.path.startsWith('/api/')) {
     res.status(404).json({ error: 'API endpoint not found' });
     return;
   }
