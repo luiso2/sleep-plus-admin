@@ -2,11 +2,11 @@
 // Configuración del servidor para diferentes entornos
 
 const config = {
-  // Puerto del servidor
-  port: process.env.PORT || 8080,
+  // Puerto del servidor - EasyPanel usa puerto 80
+  port: process.env.PORT || 80,
   
   // Host del servidor
-  host: process.env.HOST || '127.0.0.1',
+  host: process.env.HOST || '0.0.0.0',
   
   // Configuración de CORS
   cors: {

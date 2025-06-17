@@ -1,0 +1,76 @@
+# Dockerfile para EasyPanel - Versión Corregida
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copiar archivos de dependencias
+COPY package*.json ./
+
+# Instalar TODAS las dependencias (necesario para build)
+RUN npm ci
+
+# Copiar todo el código fuente
+COPY . .
+
+# Variables de build con valores por defecto
+ARG VITE_API_URL=https://telegram-crm-millonario-sleep-admin.dqyvuv.easypanel.host
+ARG VITE_APP_NAME="Sleep+ Admin"
+ARG VITE_APP_VERSION="1.0.0"
+ARG VITE_ENABLE_DEVTOOLS="false"
+
+# Configurar variables de entorno para el build
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_APP_NAME=${VITE_APP_NAME}
+ENV VITE_APP_VERSION=${VITE_APP_VERSION}
+ENV VITE_ENABLE_DEVTOOLS=${VITE_ENABLE_DEVTOOLS}
+
+# Build del frontend
+RUN npm run build
+
+# Verificar que el build se completó
+RUN ls -la dist/
+
+# Etapa de producción
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Instalar dumb-init
+RUN apk add --no-cache dumb-init
+
+# Copiar package.json para instalar dependencias de producción
+COPY package*.json ./
+
+# Instalar solo dependencias de producción
+RUN npm ci --omit=dev && npm cache clean --force
+
+# Copiar el servidor y archivos necesarios
+COPY server/ ./server/
+COPY db.json ./
+COPY routes.json ./
+
+# IMPORTANTE: Copiar el build del frontend
+COPY --from=builder /app/dist ./dist
+
+# Verificar que los archivos están en su lugar
+RUN echo "Verificando estructura de archivos:" && \
+    ls -la && \
+    echo "Contenido de dist:" && \
+    ls -la dist/
+
+# Variables de entorno
+ENV NODE_ENV=production
+ENV PORT=80
+ENV HOST=0.0.0.0
+ENV API_URL=https://telegram-crm-millonario-sleep-admin.dqyvuv.easypanel.host
+
+# Exponer puerto 80 (EasyPanel usa este por defecto)
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:80/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+
+# Iniciar servidor
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "server/server.js"]

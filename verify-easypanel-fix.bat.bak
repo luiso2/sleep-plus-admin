@@ -1,0 +1,67 @@
+@echo off
+echo ====================================
+echo Verificando Build para EasyPanel
+echo ====================================
+echo.
+
+echo Construyendo imagen Docker...
+docker build -f Dockerfile.easypanel-fixed ^
+  --build-arg VITE_API_URL="https://telegram-crm-millonario-sleep-admin.dqyvuv.easypanel.host" ^
+  --build-arg VITE_APP_NAME="Sleep+ Admin" ^
+  --build-arg VITE_APP_VERSION="1.0.0" ^
+  --build-arg VITE_ENABLE_DEVTOOLS="false" ^
+  -t sleep-admin-test .
+
+if %ERRORLEVEL% NEQ 0 (
+    echo ERROR: Fallo la construccion de la imagen
+    pause
+    exit /b 1
+)
+
+echo.
+echo Ejecutando contenedor de prueba...
+docker run -d --name sleep-test -p 3000:80 sleep-admin-test
+
+echo.
+echo Esperando que el servidor inicie...
+timeout /t 5 /nobreak > nul
+
+echo.
+echo Verificando health check...
+curl -f http://localhost:3000/health
+echo.
+
+echo.
+echo Verificando archivos del sistema...
+curl -f http://localhost:3000/api/debug/files
+echo.
+
+echo.
+echo Verificando frontend...
+curl -f http://localhost:3000/ -o test-index.html
+if exist test-index.html (
+    echo Frontend HTML recibido correctamente
+    del test-index.html
+) else (
+    echo ERROR: No se pudo obtener el frontend
+)
+
+echo.
+echo Logs del contenedor:
+docker logs sleep-test
+
+echo.
+echo Limpiando...
+docker stop sleep-test
+docker rm sleep-test
+
+echo.
+echo ====================================
+echo Verificacion completada
+echo ====================================
+echo.
+echo Si todo funciono correctamente, usa este Dockerfile en EasyPanel:
+echo - Dockerfile: Dockerfile.easypanel-fixed
+echo - Puerto: 80
+echo.
+pause

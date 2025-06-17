@@ -13,7 +13,8 @@ Este proyecto utiliza variables de entorno para gestionar diferentes configuraci
 - `VITE_ENABLE_DEVTOOLS`: Habilitar herramientas de desarrollo (true/false)
 
 #### Backend (Node.js)
-- `PORT`: Puerto del servidor (por defecto: 3001)
+- `PORT`: Puerto del servidor (por defecto: 80 para producción/EasyPanel, 3001 para desarrollo)
+- `HOST`: Host del servidor (por defecto: 0.0.0.0)
 - `NODE_ENV`: Entorno de ejecución (development/production)
 - `CORS_ORIGIN`: Origen permitido para CORS (por defecto: *)
 - `DB_PATH`: Ruta de la base de datos JSON (por defecto: ./db.json)
@@ -84,7 +85,36 @@ heroku config:set NODE_ENV=production
 heroku config:set CORS_ORIGIN=https://tu-frontend.vercel.app
 ```
 
-#### Opción C: Despliegue en VPS (Servidor Completo)
+#### Opción C: Despliegue en EasyPanel (Recomendado)
+
+EasyPanel simplifica el despliegue usando Docker:
+
+1. **Configuración en EasyPanel**:
+   - Port: `80`
+   - Dockerfile: `Dockerfile`
+   - Build Context: `/`
+
+2. **Variables de Entorno**:
+   ```env
+   NODE_ENV=production
+   PORT=80
+   HOST=0.0.0.0
+   API_URL=https://tu-app.easypanel.host
+   ```
+
+3. **Build Arguments**:
+   ```env
+   VITE_API_URL=https://tu-app.easypanel.host
+   VITE_APP_NAME=Sleep+ Admin
+   VITE_APP_VERSION=1.0.0
+   VITE_ENABLE_DEVTOOLS=false
+   ```
+
+4. **Verificar despliegue**:
+   - Health check: `https://tu-app.easypanel.host/health`
+   - Debug: `https://tu-app.easypanel.host/api/debug/files`
+
+#### Opción D: Despliegue en VPS (Servidor Completo)
 
 1. Instalar Node.js y PM2 en el servidor
 2. Clonar el repositorio

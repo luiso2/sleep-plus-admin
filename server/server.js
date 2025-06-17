@@ -16,6 +16,31 @@ app.use(cors(config.cors));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// CRÍTICO: Verificar y servir archivos estáticos del frontend
+const distPath = path.join(__dirname, '..', 'dist');
+const indexPath = path.join(distPath, 'index.html');
+
+console.log('🔍 Verificando archivos del frontend...');
+console.log('📁 Working directory:', process.cwd());
+console.log('📁 Dist path:', distPath);
+console.log('📄 Index.html exists:', fs.existsSync(indexPath));
+
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  console.log('✅ Frontend configurado en:', distPath);
+  
+  // Listar archivos para debug
+  try {
+    const files = fs.readdirSync(distPath);
+    console.log('📋 Archivos en dist:', files);
+  } catch (err) {
+    console.error('❌ Error listando archivos:', err);
+  }
+} else {
+  console.error('❌ ERROR: Directorio dist no encontrado!');
+  console.error('   Asegúrate de que el build del frontend se completó correctamente');
+}
+
 // Logging middleware mejorado
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString();
@@ -27,12 +52,46 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check endpoint
+// Health check endpoint con más información
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     server: 'express-shopify-proxy',
+    frontend: fs.existsSync(indexPath),
+    frontendPath: distPath,
+    port: PORT,
     timestamp: new Date().toISOString()
+  });
+});
+
+// Debug endpoint para verificar archivos
+app.get('/api/debug/files', (req, res) => {
+  const checkPath = (p, label) => {
+    const exists = fs.existsSync(p);
+    const stats = exists ? fs.statSync(p) : null;
+    return {
+      label,
+      path: p,
+      exists,
+      isDirectory: stats?.isDirectory(),
+      files: stats?.isDirectory() ? fs.readdirSync(p).slice(0, 10) : null
+    };
+  };
+  
+  res.json({
+    cwd: process.cwd(),
+    dirname: __dirname,
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      PORT: process.env.PORT,
+      API_URL: process.env.API_URL
+    },
+    checks: [
+      checkPath(path.join(__dirname, '..'), 'Parent dir'),
+      checkPath(path.join(__dirname, '..', 'dist'), 'Dist dir'),
+      checkPath(path.join(__dirname, '..', 'dist', 'index.html'), 'Index.html'),
+      checkPath(path.join(__dirname, '..', 'public'), 'Public dir'),
+    ]
   });
 });
 
@@ -1237,6 +1296,52 @@ app.use(middlewares);
 // Usar el router de json-server para todas las demás rutas
 app.use(router);
 
+// SPA fallback - IMPORTANTE: Debe ir después de todas las rutas API
+// Cualquier ruta no manejada devuelve el index.html
+app.get('*', (req, res) => {
+  // No aplicar a rutas API
+  if (req.path.startsWith('/api/') || req.path.startsWith('/api')) {
+    res.status(404).json({ error: 'API endpoint not found' });
+    return;
+  }
+  
+  console.log(`🌐 SPA route requested: ${req.path}`);
+  
+  if (fs.existsSync(indexPath)) {
+    console.log('✅ Serving index.html');
+    res.sendFile(indexPath);
+  } else {
+    console.error('❌ index.html not found at:', indexPath);
+    res.status(404).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Error - Frontend no encontrado</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 40px; }
+          .error { background: #fee; padding: 20px; border-radius: 5px; }
+          code { background: #f4f4f4; padding: 2px 5px; }
+          .debug { margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="error">
+          <h1>Error: Frontend no encontrado</h1>
+          <p>El build del frontend no está disponible.</p>
+          <p>Path esperado: <code>${indexPath}</code></p>
+          <div class="debug">
+            <h3>Debug:</h3>
+            <p>Para verificar la estructura de archivos, visita:</p>
+            <p><a href="/api/debug/files">/api/debug/files</a></p>
+            <p><a href="/health">/health</a></p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+});
+
 // ======================
 // ERROR HANDLING
 // ======================
@@ -1287,15 +1392,27 @@ app.listen(PORT, HOST, () => {
   const PUBLIC_URL = process.env.API_URL || process.env.VITE_API_URL || `http://${HOST}:${PORT}`;
   
   console.log('');
+  console.log('====================');
   console.log('🚀 Server is running!');
   console.log('====================');
   console.log(`📡 Host: ${HOST}`);
   console.log(`📡 Port: ${PORT}`);
   console.log(`🌐 URL: ${PUBLIC_URL}`);
+  console.log(`📁 Frontend: ${fs.existsSync(indexPath) ? '✅ Available' : '❌ NOT FOUND'}`);
+  console.log(`📄 Database: ${fs.existsSync(dbPath) ? '✅ Available' : '❌ NOT FOUND'}`);
   console.log('');
+  
+  if (!fs.existsSync(indexPath)) {
+    console.log('⚠️  WARNING: Frontend build not found!');
+    console.log('   The server is running but the frontend is not available.');
+    console.log('   Please check that the Docker build completed successfully.');
+    console.log('');
+  }
+  
   console.log('📋 Available endpoints:');
-  console.log('  Health Check:');
+  console.log('  Debug:');
   console.log(`    GET  ${PUBLIC_URL}/health`);
+  console.log(`    GET  ${PUBLIC_URL}/api/debug/files`);
   console.log('');
   console.log('  Shopify Proxy:');
   console.log(`    POST ${PUBLIC_URL}/api/shopify/test-connection`);
