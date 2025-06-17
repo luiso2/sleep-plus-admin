@@ -4,7 +4,8 @@ const cors = require('cors');
 const jsonServer = require('json-server');
 const path = require('path');
 const stripe = require('stripe');
-const fs = require('fs').promises;
+const fs = require('fs');
+const fsPromises = require('fs').promises;
 const config = require('./config');
 
 const app = express();
@@ -687,7 +688,7 @@ let stripeClient = null;
 async function readDatabase() {
   try {
     const dbPath = path.join(__dirname, '..', 'db.json');
-    const data = await fs.readFile(dbPath, 'utf8');
+    const data = await fsPromises.readFile(dbPath, 'utf8');
     return JSON.parse(data);
   } catch (error) {
     console.error('Error leyendo database:', error);
@@ -699,7 +700,7 @@ async function readDatabase() {
 async function writeDatabase(data) {
   try {
     const dbPath = path.join(__dirname, '..', 'db.json');
-    await fs.writeFile(dbPath, JSON.stringify(data, null, 2));
+    await fsPromises.writeFile(dbPath, JSON.stringify(data, null, 2));
     return true;
   } catch (error) {
     console.error('Error escribiendo database:', error);
