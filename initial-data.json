@@ -1,0 +1,157 @@
+{
+  "employees": [
+    {
+      "id": "emp-demo",
+      "employeeId": "DEMO01",
+      "email": "demo@lamattressstore.com",
+      "firstName": "Demo",
+      "lastName": "Usuario",
+      "role": "agent",
+      "storeId": "store-001",
+      "phoneExtension": "104",
+      "avatar": "/avatars/demo.jpg",
+      "status": "active",
+      "shift": "morning",
+      "hiredAt": "2025-06-13T16:00:00Z",
+      "commissions": {
+        "totalEvaluations": 5,
+        "totalCommissionEarned": 120,
+        "currentMonthEvaluations": 2,
+        "currentMonthCommission": 50
+      },
+      "performance": {
+        "callsToday": 25,
+        "callsTarget": 80,
+        "conversionsToday": 4,
+        "conversionRate": 16,
+        "averageCallDuration": 220
+      },
+      "createdAt": "2025-06-13T16:00:00Z",
+      "updatedAt": "2025-06-13T16:00:00Z"
+    },
+    {
+      "id": "admin-001",
+      "employeeId": "ADM001",
+      "email": "admin@lamattressstore.com",
+      "firstName": "Admin",
+      "lastName": "User",
+      "role": "admin",
+      "storeId": "store-001",
+      "phoneExtension": "999",
+      "avatar": "/avatars/admin.jpg",
+      "status": "active",
+      "shift": "full",
+      "hiredAt": "2019-01-01T00:00:00Z",
+      "commissions": {
+        "totalEvaluations": 0,
+        "totalCommissionEarned": 0,
+        "currentMonthEvaluations": 0,
+        "currentMonthCommission": 0
+      },
+      "performance": {
+        "callsToday": 0,
+        "callsTarget": 0,
+        "conversionsToday": 0,
+        "conversionRate": 0,
+        "averageCallDuration": 0
+      },
+      "createdAt": "2019-01-01T00:00:00Z",
+      "updatedAt": "2024-06-11T00:00:00Z"
+    }
+  ],
+  "stores": [
+    {
+      "id": "store-001",
+      "name": "Studio City",
+      "code": "SC001",
+      "address": {
+        "street": "12345 Ventura Blvd",
+        "city": "Studio City",
+        "state": "CA",
+        "zipCode": "91604"
+      },
+      "phone": "(555) 100-0001",
+      "managerId": "admin-001",
+      "hours": {
+        "monday": { "open": "10:00", "close": "20:00" },
+        "tuesday": { "open": "10:00", "close": "20:00" },
+        "wednesday": { "open": "10:00", "close": "20:00" },
+        "thursday": { "open": "10:00", "close": "20:00" },
+        "friday": { "open": "10:00", "close": "21:00" },
+        "saturday": { "open": "10:00", "close": "21:00" },
+        "sunday": { "open": "11:00", "close": "19:00" }
+      },
+      "serviceArea": {
+        "zipCodes": ["91604", "91602", "91605", "91607"],
+        "radius": 10
+      },
+      "performance": {
+        "monthlyTarget": 50000,
+        "currentSales": 0
+      },
+      "status": "active",
+      "createdAt": "2020-01-01T00:00:00Z",
+      "updatedAt": "2024-06-11T00:00:00Z"
+    }
+  ],
+  "permissions": [
+    {
+      "id": "perm-admin-001",
+      "roleId": "role-admin",
+      "resource": "*",
+      "action": "*",
+      "allowed": true
+    },
+    {
+      "id": "perm-agent-001",
+      "roleId": "role-agent",
+      "resource": "customers",
+      "action": "list",
+      "allowed": true
+    },
+    {
+      "id": "perm-agent-002",
+      "roleId": "role-agent",
+      "resource": "customers",
+      "action": "show",
+      "allowed": true
+    },
+    {
+      "id": "perm-agent-003",
+      "roleId": "role-agent",
+      "resource": "customers",
+      "action": "create",
+      "allowed": true
+    },
+    {
+      "id": "perm-agent-004",
+      "roleId": "role-agent",
+      "resource": "customers",
+      "action": "edit",
+      "allowed": true
+    }
+  ],
+  "customers": [],
+  "subscriptions": [],
+  "evaluations": [],
+  "calls": [],
+  "sales": [],
+  "campaigns": [],
+  "achievements": [],
+  "scripts": [],
+  "commissions": [],
+  "shopifySettings": [],
+  "shopifyProducts": [],
+  "shopifyCustomers": [],
+  "shopifyCoupons": [],
+  "activityLogs": [],
+  "webhooks": [],
+  "webhookEvents": [],
+  "userPermissionOverrides": [],
+  "dailyGoals": [],
+  "dailyProgress": [],
+  "paymentLinks": [],
+  "stripeConfig": [],
+  "stripeSubscriptions": [],
+  "stripeWebhooks": []
+}

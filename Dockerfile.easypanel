@@ -1,0 +1,65 @@
+# Dockerfile.easypanel - Versión optimizada para EasyPanel
+# Build más rápido y ligero
+
+# Etapa 1: Build del frontend
+FROM node:18-slim AS builder
+
+# Instalar dependencias del sistema necesarias
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copiar solo lo necesario para instalar dependencias
+COPY package*.json ./
+
+# Instalar dependencias con caché optimizado
+RUN npm ci --no-audit --no-fund
+
+# Copiar el resto del código
+COPY . .
+
+# Build con modo producción
+RUN npm run build:prod || npm run build
+
+# Verificar build
+RUN test -d dist && test -f dist/index.html || exit 1
+
+# Etapa 2: Runtime minimalista
+FROM node:18-alpine
+
+RUN apk add --no-cache dumb-init
+
+WORKDIR /app
+
+# Copiar dependencias de producción
+COPY package*.json ./
+RUN npm ci --production --no-audit --no-fund && \
+    npm cache clean --force
+
+# Copiar archivos necesarios
+COPY --from=builder /app/dist ./dist
+COPY server ./server
+COPY db.json routes.json start.sh ./
+COPY .env.production .env
+
+# Script simple de reemplazo
+RUN echo '#!/bin/sh\n\
+if [ ! -z "$API_URL" ]; then\n\
+  find /app/dist -name "*.js" -o -name "*.html" | xargs sed -i "s|DYNAMIC_API_URL|$API_URL|g"\n\
+fi' > replace-api-url.sh && chmod +x *.sh
+
+# Usuario no-root
+RUN adduser -D -u 1001 app && chown -R app:app /app
+USER app
+
+EXPOSE 80
+
+ENV NODE_ENV=production PORT=80 HOST=0.0.0.0
+
+HEALTHCHECK CMD node -e "require('http').get('http://localhost:80/health', res => process.exit(res.statusCode === 200 ? 0 : 1))"
+
+CMD ["dumb-init", "./start.sh"]

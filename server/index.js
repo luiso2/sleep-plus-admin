@@ -3,12 +3,13 @@ const axios = require('axios');
 const cors = require('cors');
 const jsonServer = require('json-server');
 const path = require('path');
+const config = require('./config');
 
 const app = express();
-const PORT = 3001;
+const PORT = config.port;
 
-// Middleware
-app.use(cors());
+// Middleware con configuración CORS detallada
+app.use(cors(config.cors));
 app.use(express.json());
 
 // Log para debugging
@@ -156,8 +157,11 @@ app.use(middlewares);
 // Use JSON Server router for all other routes
 app.use(router);
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`Shopify proxy endpoints available at http://localhost:${PORT}/api/shopify/*`);
-  console.log(`JSON Server routes available at http://localhost:${PORT}/*`);
+app.listen(PORT, config.host, () => {
+  console.log(`Server running on http://${config.host}:${PORT}`);
+  console.log(`Environment: ${config.environment}`);
+  console.log(`CORS Origins: ${JSON.stringify(config.cors.origin)}`);
+  console.log(`CORS Methods: ${config.cors.methods.join(', ')}`);
+  console.log(`Shopify proxy endpoints available at http://${config.host}:${PORT}/api/shopify/*`);
+  console.log(`JSON Server routes available at http://${config.host}:${PORT}/*`);
 });

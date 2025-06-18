@@ -13,10 +13,10 @@ import {
   Tag,
   Alert,
   Switch,
-  Divider,
   List,
   Statistic,
   Progress,
+  Spin,
 } from "antd";
 import {
   FileTextOutlined,
@@ -24,7 +24,6 @@ import {
   DeleteOutlined,
   BranchesOutlined,
   TagOutlined,
-  QuestionCircleOutlined,
   InfoCircleOutlined,
   LineChartOutlined,
   PercentageOutlined,
@@ -38,17 +37,23 @@ export const ScriptEdit: React.FC = () => {
   const { formProps, saveButtonProps, queryResult } = useForm<IScript>();
   const scriptData = queryResult?.data?.data;
   
-  const [segments, setSegments] = useState<IScript["segments"]>(
-    scriptData?.segments || []
-  );
-  const [variables, setVariables] = useState<string[]>(
-    scriptData?.variables || []
-  );
+  const [segments, setSegments] = useState<IScript["segments"]>([]);
+  const [variables, setVariables] = useState<string[]>([]);
+
+  console.log("ScriptEdit - Estado actual:", {
+    isLoading: queryResult?.isLoading,
+    isError: queryResult?.isError,
+    error: queryResult?.error,
+    scriptData,
+    segments,
+    variables
+  });
 
   useEffect(() => {
     if (scriptData) {
-      setSegments(scriptData.segments);
-      setVariables(scriptData.variables);
+      console.log("ScriptEdit - Datos recibidos:", scriptData);
+      setSegments(scriptData.segments || []);
+      setVariables(scriptData.variables || []);
     }
   }, [scriptData]);
 
@@ -99,11 +104,56 @@ export const ScriptEdit: React.FC = () => {
     setVariables(Array.from(allVariables));
   };
 
+  // Mostrar loading mientras se cargan los datos
+  if (queryResult?.isLoading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '50px' }}>
+        <Spin size="large" />
+        <div style={{ marginTop: 16 }}>
+          <Text>Cargando script...</Text>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar error si hay problemas
+  if (queryResult?.isError) {
+    return (
+      <Alert
+        message="Error al cargar el script"
+        description={
+          <div>
+            <p>Ha ocurrido un error al cargar los datos del script.</p>
+            <p><strong>Error:</strong> {queryResult.error?.message || "Error desconocido"}</p>
+            <p><strong>Detalles:</strong> {JSON.stringify(queryResult.error, null, 2)}</p>
+          </div>
+        }
+        type="error"
+        showIcon
+        style={{ margin: '20px' }}
+      />
+    );
+  }
+
+  // Verificar que tengamos datos
+  if (!scriptData) {
+    return (
+      <Alert
+        message="Script no encontrado"
+        description="No se pudieron cargar los datos del script. Por favor, verifica que el ID sea correcto."
+        type="warning"
+        showIcon
+        style={{ margin: '20px' }}
+      />
+    );
+  }
+
   return (
     <Edit 
       saveButtonProps={{
         ...saveButtonProps,
         onClick: (e) => {
+          console.log("Guardando script con datos:", { segments, variables });
           // Añadir los segmentos y variables al formulario antes de enviar
           formProps.form?.setFieldsValue({
             segments,
@@ -116,7 +166,7 @@ export const ScriptEdit: React.FC = () => {
       <Form {...formProps} layout="vertical">
         <Row gutter={[16, 16]}>
           {/* Métricas de rendimiento */}
-          {scriptData && scriptData.usageCount > 0 && (
+          {scriptData.usageCount > 0 && (
             <Col span={24}>
               <Card title="Métricas de Rendimiento" bordered={false}>
                 <Row gutter={16}>
@@ -326,7 +376,7 @@ export const ScriptEdit: React.FC = () => {
                                 <Space>
                                   <BranchesOutlined />
                                   <Text>
-                                    Si "{branch.condition}" → Ir a {branch.nextSegmentId}
+                                    Si &quot;{branch.condition}&quot; → Ir a {branch.nextSegmentId}
                                   </Text>
                                 </Space>
                               </List.Item>
@@ -377,12 +427,12 @@ export const ScriptEdit: React.FC = () => {
               description={
                 <Space direction="vertical">
                   <Text>
-                    Creado por: {scriptData?.createdBy} el{" "}
-                    {scriptData?.createdAt && new Date(scriptData.createdAt).toLocaleDateString()}
+                    Creado por: {scriptData.createdBy} el{" "}
+                    {scriptData.createdAt && new Date(scriptData.createdAt).toLocaleDateString()}
                   </Text>
                   <Text>
                     Última actualización:{" "}
-                    {scriptData?.updatedAt && new Date(scriptData.updatedAt).toLocaleDateString()}
+                    {scriptData.updatedAt && new Date(scriptData.updatedAt).toLocaleDateString()}
                   </Text>
                 </Space>
               }

@@ -60,7 +60,7 @@ export const CampaignList: React.FC = () => {
   };
 
   const calculateConversionRate = (campaign: ICampaign) => {
-    if (campaign.metrics.contacted === 0) return 0;
+    if (!campaign.metrics || campaign.metrics.contacted === 0) return 0;
     return ((campaign.metrics.converted / campaign.metrics.contacted) * 100).toFixed(1);
   };
 
@@ -163,11 +163,11 @@ export const CampaignList: React.FC = () => {
             <Space direction="vertical" size={0} style={{ width: 120 }}>
               <Space>
                 <PhoneOutlined />
-                <Text>{record.metrics.totalCalls} llamadas</Text>
+                <Text>{record.metrics?.totalCalls || 0} llamadas</Text>
               </Space>
               <Space>
                 <UserOutlined />
-                <Text>{record.metrics.contacted} contactados</Text>
+                <Text>{record.metrics?.contacted || 0} contactados</Text>
               </Space>
               <Progress
                 percent={Number(calculateConversionRate(record))}
@@ -184,13 +184,13 @@ export const CampaignList: React.FC = () => {
           render={(_, record: ICampaign) => (
             <Space direction="vertical" size={0}>
               <Statistic
-                value={record.metrics.converted}
+                value={record.metrics?.converted || 0}
                 prefix={<UserOutlined />}
                 suffix="conversiones"
                 valueStyle={{ fontSize: 14 }}
               />
               <Statistic
-                value={record.metrics.revenue}
+                value={record.metrics?.revenue || 0}
                 prefix="$"
                 precision={2}
                 valueStyle={{ fontSize: 14, color: "#3f8600" }}

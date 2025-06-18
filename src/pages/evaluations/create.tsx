@@ -17,6 +17,7 @@ import {
   Radio,
   Divider,
   notification,
+  Tag,
 } from "antd";
 import {
   UserOutlined,
@@ -53,6 +54,9 @@ const MATTRESS_SIZES = [
 
 export const EvaluationCreate: React.FC = () => {
   const { formProps, saveButtonProps, onFinish } = useForm<IEvaluation>();
+  
+  // Debug logging
+  console.log('EvaluationCreate rendered:', { formProps, saveButtonProps });
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [estimatedCredit, setEstimatedCredit] = useState(0);
   const [selectedBrand, setSelectedBrand] = useState<string>("");
@@ -132,7 +136,9 @@ export const EvaluationCreate: React.FC = () => {
     }
   }, [selectedBrand, mattressAge, mattressCondition]);
 
-  const handleSubmit = (values: any) => {
+  const handleSubmit = async (values: any) => {
+    console.log('Form submitted with values:', values);
+    
     if (fileList.length < 3) {
       notification.error({
         message: "Error",
@@ -141,34 +147,43 @@ export const EvaluationCreate: React.FC = () => {
       return;
     }
 
-    // Simulate AI evaluation
-    const aiEvaluation = {
-      conditionScore: mattressCondition === "excellent" ? 95 : mattressCondition === "good" ? 80 : mattressCondition === "fair" ? 60 : 30,
-      brandScore: MATTRESS_BRANDS.find((b) => b.value === selectedBrand)?.score || 50,
-      ageScore: Math.max(20, 100 - (mattressAge - 2) * 10),
-      sizeScore: 85,
-      finalScore: Math.round(estimatedCredit / 2),
-      confidence: Math.min(95, 70 + fileList.length * 5),
-    };
+    try {
+      // Simulate AI evaluation
+      const aiEvaluation = {
+        conditionScore: mattressCondition === "excellent" ? 95 : mattressCondition === "good" ? 80 : mattressCondition === "fair" ? 60 : 30,
+        brandScore: MATTRESS_BRANDS.find((b) => b.value === selectedBrand)?.score || 50,
+        ageScore: Math.max(20, 100 - (mattressAge - 2) * 10),
+        sizeScore: 85,
+        finalScore: Math.round(estimatedCredit / 2),
+        confidence: Math.min(95, 70 + fileList.length * 5),
+      };
 
-    const evaluationData = {
-      ...values,
-      photos: fileList.map((file) => ({
-        filename: file.name,
-        url: `/uploads/${file.name}`,
-        uploadDate: new Date().toISOString(),
-      })),
-      aiEvaluation,
-      creditApproved: estimatedCredit,
-      status: "approved",
-      expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-    };
+      const evaluationData = {
+        ...values,
+        photos: fileList.map((file) => ({
+          filename: file.name,
+          url: `/uploads/${file.name}`,
+          uploadDate: new Date().toISOString(),
+        })),
+        aiEvaluation,
+        creditApproved: estimatedCredit,
+        status: "approved",
+        expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+      };
 
-    onFinish(evaluationData);
+      console.log('Submitting evaluation data:', evaluationData);
+      await onFinish(evaluationData);
+    } catch (error) {
+      console.error('Error submitting evaluation:', error);
+      notification.error({
+        message: "Error",
+        description: "Hubo un error al crear la evaluación. Inténtalo de nuevo.",
+      });
+    }
   };
 
   return (
-    <Create saveButtonProps={{ ...saveButtonProps, onClick: () => formProps.form?.submit() }}>
+    <Create saveButtonProps={saveButtonProps}>
       <Form {...formProps} layout="vertical" onFinish={handleSubmit}>
         <Row gutter={[16, 16]}>
           <Col span={24}>
@@ -458,6 +473,23 @@ export const EvaluationCreate: React.FC = () => {
                 </Col>
               </Row>
             </Card>
+          </Col>
+        </Row>
+        
+        {/* Debug button */}
+        <Row style={{ marginTop: 16 }}>
+          <Col span={24}>
+            <Button 
+              type="dashed" 
+              onClick={() => {
+                console.log('Debug button clicked');
+                console.log('Form values:', formProps.form?.getFieldsValue());
+                console.log('Form errors:', formProps.form?.getFieldsError());
+                formProps.form?.submit();
+              }}
+            >
+              Debug Submit
+            </Button>
           </Col>
         </Row>
       </Form>

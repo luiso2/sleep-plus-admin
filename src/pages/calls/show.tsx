@@ -35,8 +35,17 @@ const { Title, Text, Paragraph } = Typography;
 
 export const CallShow: React.FC = () => {
   const { queryResult } = useShow<ICall>();
-  const { data, isLoading } = queryResult;
+  const { data, isLoading, error } = queryResult;
   const call = data?.data;
+
+  // Debug logging
+  console.log('CallShow Debug:', {
+    isLoading,
+    error,
+    data,
+    call,
+    queryResult
+  });
 
   const { data: customerData } = useOne<ICustomer>({
     resource: "customers",
@@ -57,8 +66,16 @@ export const CallShow: React.FC = () => {
   const customer = customerData?.data;
   const employee = employeeData?.data;
 
-  if (isLoading || !call) {
+  if (isLoading) {
     return <div>Cargando...</div>;
+  }
+
+  if (error) {
+    return <div>Error al cargar la llamada: {error.message}</div>;
+  }
+
+  if (!call) {
+    return <div>No se encontraron datos de la llamada. Data recibida: {JSON.stringify(data)}</div>;
   }
 
   const formatDuration = (seconds: number) => {
@@ -116,10 +133,10 @@ export const CallShow: React.FC = () => {
                   <PhoneOutlined style={{ fontSize: 24 }} />
                   <div>
                     <Title level={3} style={{ margin: 0 }}>
-                      Llamada {call.type === "outbound" ? "Saliente" : "Entrante"}
+                      Llamada {call.type === "outbound" ? "Saliente" : call.type === "inbound" ? "Entrante" : "Desconocida"}
                     </Title>
                     <Space>
-                      <Tag color={getStatusColor(call.status)}>
+                      <Tag color={getStatusColor(call.status || '')}>
                         {call.status === "completed"
                           ? "Completada"
                           : call.status === "no_answer"
@@ -130,9 +147,9 @@ export const CallShow: React.FC = () => {
                           ? "Fallida"
                           : call.status === "voicemail"
                           ? "Buzón de voz"
-                          : call.status}
+                          : call.status || 'Desconocido'}
                       </Tag>
-                      <Tag color={getDispositionColor(call.disposition)}>
+                      <Tag color={getDispositionColor(call.disposition || '')}>
                         {call.disposition === "sale"
                           ? "Venta"
                           : call.disposition === "interested"
@@ -143,7 +160,7 @@ export const CallShow: React.FC = () => {
                           ? "No interesado"
                           : call.disposition === "wrong_number"
                           ? "Número equivocado"
-                          : call.disposition}
+                          : call.disposition || 'Desconocido'}
                       </Tag>
                     </Space>
                   </div>
@@ -180,28 +197,28 @@ export const CallShow: React.FC = () => {
                 <Descriptions.Item label="Inicio" span={1}>
                   <Space>
                     <CalendarOutlined />
-                    {dayjs(call.startTime).format("DD/MM/YYYY HH:mm:ss")}
+                    {call.startTime ? dayjs(call.startTime).format("DD/MM/YYYY HH:mm:ss") : 'N/A'}
                   </Space>
                 </Descriptions.Item>
 
                 <Descriptions.Item label="Fin" span={1}>
                   <Space>
                     <CalendarOutlined />
-                    {dayjs(call.endTime).format("DD/MM/YYYY HH:mm:ss")}
+                    {call.endTime ? dayjs(call.endTime).format("DD/MM/YYYY HH:mm:ss") : 'N/A'}
                   </Space>
                 </Descriptions.Item>
 
                 <Descriptions.Item label="Duración" span={2}>
                   <Space>
                     <ClockCircleOutlined />
-                    {formatDuration(call.duration)}
+                    {formatDuration(call.duration || 0)}
                   </Space>
                 </Descriptions.Item>
 
                 <Descriptions.Item label="Script Utilizado" span={2}>
                   <Space>
                     <FileTextOutlined />
-                    {call.script.name} (v{call.script.version})
+                    {call.script?.name || 'N/A'} {call.script?.version ? `(v${call.script.version})` : ''}
                   </Space>
                 </Descriptions.Item>
               </Descriptions>

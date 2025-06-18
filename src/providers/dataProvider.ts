@@ -125,19 +125,20 @@ export const customDataProvider: DataProvider = {
     }
     
     // json-server prefers PUT for updates with full data
-    // or PATCH for partial updates
+    // Use PUT for resources that need full object updates
     let response;
     
-    // For permissions, we need to send the full object
-    if (resource === 'permissions' && previousData) {
+    // For permissions and systemSettings, we need to send the full object
+    if (['permissions', 'systemSettings'].includes(resource) && previousData) {
       response = await axiosInstance.put(`/${resource}/${id}`, {
         ...previousData,
         ...variables,
         updatedAt: new Date().toISOString()
       });
     } else {
-      // For other resources, use PATCH for partial updates
-      response = await axiosInstance.patch(`/${resource}/${id}`, variables);
+      // For other resources, use PUT instead of PATCH for better JSON Server compatibility
+      const updateData = previousData ? { ...previousData, ...variables } : variables;
+      response = await axiosInstance.put(`/${resource}/${id}`, updateData);
     }
     
     // Log update activity
@@ -177,11 +178,29 @@ export const customDataProvider: DataProvider = {
   },
 
   getMany: async ({ resource, ids }) => {
-    const response = await Promise.all(
-      ids.map((id) => axiosInstance.get(`/${resource}/${id}`))
+    console.log(`Getting many for resource: ${resource}, ids:`, ids);
+    
+    const responses = await Promise.allSettled(
+      ids.map(async (id) => {
+        try {
+          const response = await axiosInstance.get(`/${resource}/${id}`);
+          return response.data;
+        } catch (error) {
+          console.warn(`Failed to fetch ${resource}/${id}:`, error);
+          return null;
+        }
+      })
     );
+    
+    // Filter out failed requests and extract successful data
+    const data = responses
+      .filter((response): response is PromiseFulfilledResult<any> => 
+        response.status === 'fulfilled' && response.value !== null
+      )
+      .map(response => response.value);
+    
     return {
-      data: response.map((res) => res.data),
+      data,
     };
   },
 
@@ -219,7 +238,7 @@ export const customDataProvider: DataProvider = {
 
   updateMany: async ({ resource, ids, variables }) => {
     const response = await Promise.all(
-      ids.map((id) => axiosInstance.patch(`/${resource}/${id}`, variables))
+      ids.map((id) => axiosInstance.put(`/${resource}/${id}`, variables))
     );
     
     // Log bulk update activity

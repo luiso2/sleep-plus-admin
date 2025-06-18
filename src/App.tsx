@@ -116,6 +116,7 @@ import {
   ScriptEdit,
   ScriptShow,
 } from "./pages/scripts";
+import { ScriptEditSimple } from "./pages/scripts/edit-simple";
 
 // Import activity log pages
 import { ActivityLogList, ActivityLogShow } from "./pages/activity-logs";
@@ -580,6 +581,7 @@ function App() {
                     <Route index element={<ScriptList />} />
                     <Route path="create" element={<ScriptCreate />} />
                     <Route path="edit/:id" element={<ScriptEdit />} />
+                    <Route path="edit-simple/:id" element={<ScriptEditSimple />} />
                     <Route path="show/:id" element={<ScriptShow />} />
                   </Route>
 

@@ -3,70 +3,115 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+
+# Development
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
 
 # Build outputs
 dist/
 build/
+.vite/
+.cache/
 
-# Development files
-.env.local
-.env.development
-.env.test
-
-# IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
 
-# OS files
+# OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+.coverage
+.coverage.*
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Misc
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+.eslintcache
+.stylelintcache
+.prettiercache
 
 # Git
 .git/
 .gitignore
+.gitattributes
 
 # Documentation
 README.md
+CONTRIBUTING.md
+CHANGELOG.md
+LICENSE
 docs/
+*.md
 
-# Test files
-*.test.js
-*.test.ts
-*.test.tsx
-__tests__/
-coverage/
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+azure-pipelines.yml
 
-# Logs
-*.log
-logs/
-
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
-
-# Archive files
+# Archives
 *.zip
-*.tar
-*.gz
+*.tar.gz
 *.rar
-sleep-*.zip
+*.7z
+
+# Backups
 *.backup
+*.bak
+*.tmp
+*.temp
 
-# Temporary files
-tmp/
-temp/
-
-# Docker files (no necesarios dentro del container)
-Dockerfile*
-docker-compose*
+# Docker files (cuando se construye dentro del contenedor)
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
 .dockerignore
 
-# Scripts de desarrollo
-start-*.bat
+# Scripts de desarrollo local
 verify-*.bat
-test-*.js.delete
-*.delete 
+verify-*.sh
+test-*.html
+scripts/check-hardcoded-urls.js
+
+# Archivos grandes innecesarios
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.pdf
+*.psd
+*.ai
+*.sketch
